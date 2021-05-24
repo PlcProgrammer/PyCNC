@@ -105,10 +105,10 @@ class GMachine(object):
 
     # noinspection PyMethodMayBeStatic
     def __check_velocity(self, max_velocity):
-        if max_velocity.x > MAX_VELOCITY_MM_PER_MIN_X \
-                or max_velocity.y > MAX_VELOCITY_MM_PER_MIN_Y \
-                or max_velocity.z > MAX_VELOCITY_MM_PER_MIN_Z \
-                or max_velocity.e > MAX_VELOCITY_MM_PER_MIN_E:
+        if round(max_velocity.x,0) > MAX_VELOCITY_MM_PER_MIN_X \
+                or round(max_velocity.y,0) > MAX_VELOCITY_MM_PER_MIN_Y \
+                or round(max_velocity.z,0) > MAX_VELOCITY_MM_PER_MIN_Z \
+                or round(max_velocity.e,0) > MAX_VELOCITY_MM_PER_MIN_E:
             raise GMachineException("out of maximum speed")
 
     def _move_linear(self, delta, velocity):
@@ -334,7 +334,7 @@ class GMachine(object):
         if velocity < MIN_VELOCITY_MM_PER_MIN:
             raise GMachineException("feed speed too low")
         # select command and run it
-        if c == 'G0':  # rapid move
+        if c == 'G0' or c == 'G00':  # rapid move
             vl = max(MAX_VELOCITY_MM_PER_MIN_X,
                      MAX_VELOCITY_MM_PER_MIN_Y,
                      MAX_VELOCITY_MM_PER_MIN_Z,
@@ -359,13 +359,13 @@ class GMachine(object):
                     if v < vl:
                         vl = v
             self._move_linear(delta, vl)
-        elif c == 'G1':  # linear interpolation
+        elif c == 'G1' or c == 'G01':  # linear interpolation
             self._move_linear(delta, velocity)
-        elif c == 'G2':  # circular interpolation, clockwise
+        elif c == 'G2' or c == 'G02':  # circular interpolation, clockwise
             self._move_circular(delta, radius, velocity, CW)
-        elif c == 'G3':  # circular interpolation, counterclockwise
+        elif c == 'G3' or c == 'G03':  # circular interpolation, counterclockwise
             self._move_circular(delta, radius, velocity, CCW)
-        elif c == 'G4':  # delay in s
+        elif c == 'G4' or c == 'G04':  # delay in s
             if not gcode.has('P'):
                 raise GMachineException("P is not specified")
             pause = gcode.get('P', 0)
@@ -392,6 +392,8 @@ class GMachine(object):
             if not hal.calibrate(*axises):
                 raise GMachineException("failed to calibrate")
         elif c == 'G53':  # switch to machine coords
+            self._local = Coordinates(0.0, 0.0, 0.0, 0.0)
+        elif c == 'G54':  # set workpiece zero point not much to do, we ignore limits anyway
             self._local = Coordinates(0.0, 0.0, 0.0, 0.0)
         elif c == 'G90':  # switch to absolute coords
             self._absoluteCoordinates = True

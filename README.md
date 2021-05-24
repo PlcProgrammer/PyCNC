@@ -42,6 +42,9 @@ file.
 * Extruder and bed heaters are supported.
 * Hardware watchdog.
 
+# Postprocessor
+* SolidWorks (http://www.restrictedayerspace.net/cnc/grbl-postprocessor-for-solidworks)
+
 # Watchdog
 PyCNC uses one of DMA channels as hardware watchdog for safety purpose. If
 board, OS or PyCNC hangs this watchdog should disable all GPIO pins(by
